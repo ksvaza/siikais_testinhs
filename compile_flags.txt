@@ -1,0 +1,15 @@
+-s
+-static
+-O2
+-std=c23
+-Wall
+-Wextra
+-Icode\inc
+-IC:\raylib\raylib\src
+-IC:\raylib\raylib\src\external 
+-Iexternal -DPLATFORM_DESKTOP
+-LC:\raylib\raylib\src
+-lraylib
+-lopengl32
+-lgdi32
+-lwinmm
