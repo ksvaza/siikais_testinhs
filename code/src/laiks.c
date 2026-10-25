@@ -33,6 +33,15 @@ float Laiks_InMilliseconds(laiks_t l)
 	return (float)(l.ns) / (float)(1e6);
 }
 
+laiks_t Laiks_Add(laiks_t a, laiks_t b)
+{
+	return (laiks_t){ a.ns + b.ns };
+}
+laiks_t Laiks_Subtract(laiks_t a, laiks_t b)
+{
+	return (laiks_t){ a.ns - b.ns };
+}
+
 char CheckTimer(Taimeris_t *timer, laiks_t time)
 {
 	if (!timer) return false;

@@ -3,7 +3,7 @@
 
 
 typedef struct {
-	unsigned long long ns;
+	long long ns;
 } laiks_t;
 
 laiks_t Laiks_Seconds(float t);
@@ -14,6 +14,9 @@ void Laiks_AddMillliseconds(laiks_t* l, float t);
 
 float Laiks_InSeconds(laiks_t l);
 float Laiks_InMilliseconds(laiks_t l);
+
+laiks_t Laiks_Add(laiks_t a, laiks_t b);
+laiks_t Laiks_Subtract(laiks_t a, laiks_t b);
 
 typedef struct {
 	laiks_t lastTime;

@@ -55,5 +55,4 @@ dkms.conf
 *.dwo
 
 # pašsaprotami
-*.mp3
-*.wav
+/code/res

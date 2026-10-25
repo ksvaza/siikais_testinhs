@@ -6,8 +6,8 @@ Camera3D controlsCamera = {};
 
 bool controlsFlippedArrowMovement = false;
 
-float controlsMouseTranslationSpeed = 4.147f;
-float controlsMouseRotationSpeed = 30.0f;
+float controlsMouseTranslationSpeed = 0.0008f;
+float controlsMouseRotationSpeed = 0.01f;
 float controlsMouseScrollSpeed = 0.2f;
 float controlsMouseZoomSpeed = 0.2f;
 float controlsMouseAltSpeed = 0.2f;
@@ -37,8 +37,8 @@ void Controls_Update(float dt) // cietdarbi
     {
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
         {
-            CameraMoveRight(&controlsCamera, -controlsMouseTranslationSpeed * dt * zoom * mouse.x, false);
-            CameraMoveUp(&controlsCamera, controlsMouseTranslationSpeed * dt * zoom * mouse.y);
+            CameraMoveRight(&controlsCamera, -controlsMouseTranslationSpeed * zoom * mouse.x, false);
+            CameraMoveUp(&controlsCamera, controlsMouseTranslationSpeed * zoom * mouse.y);
         }
 
         if (IsKeyPressed(KEY_LEFT))
@@ -62,25 +62,25 @@ void Controls_Update(float dt) // cietdarbi
     {
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
         {
-            CameraYaw(&controlsCamera, -controlsMouseRotationSpeed * dt * mouse.x, true);
-            CameraPitch(&controlsCamera, -controlsMouseRotationSpeed * dt * mouse.y, true, true, true);
+            CameraYaw(&controlsCamera, -controlsMouseRotationSpeed * mouse.x, true);
+            CameraPitch(&controlsCamera, -controlsMouseRotationSpeed * mouse.y, true, true, true);
         }
         
         if (IsKeyPressed(KEY_LEFT))
         {
-            CameraYaw(&controlsCamera, -15 * PI / 180.0f, true);
+            CameraYaw(&controlsCamera, -15 * DEG2RAD * (controlsFlippedArrowMovement ? -1.0f : 1.0f), true);
         }
         if (IsKeyPressed(KEY_RIGHT))
         {
-            CameraYaw(&controlsCamera, 15 * PI / 180.0f, true);
+            CameraYaw(&controlsCamera, 15 * DEG2RAD * (controlsFlippedArrowMovement ? -1.0f : 1.0f), true);
         }
         if (IsKeyPressed(KEY_UP))
         {
-            CameraPitch(&controlsCamera, -15 * PI / 180.0f, true, true, true);
+            CameraPitch(&controlsCamera, -15 * DEG2RAD * (controlsFlippedArrowMovement ? -1.0f : 1.0f), true, true, true);
         }
         if (IsKeyPressed(KEY_DOWN))
         {
-            CameraPitch(&controlsCamera, 15.0f * PI / 180.0f, true, true, true);
+            CameraPitch(&controlsCamera, 15.0f * PI / 180.0f * (controlsFlippedArrowMovement ? -1.0f : 1.0f), true, true, true);
         }
     }
 

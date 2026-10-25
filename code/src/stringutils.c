@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stddef.h>
 
 size_t String_LowestPowerOfTwo(size_t in)
 {
@@ -27,9 +28,15 @@ size_t String_LowestPowerOfTwo(size_t in)
     return r;
 }
 
+void String_Terminate(string_t str)
+{
+    if (str.c_str) free(str.c_str);
+    str.c_str = nullptr;
+}
+
 void String_Fill(string_t str, char c)
 {
-    if (!str.c_str || !str.length || !str.size) return;
+    if (!str.c_str || !str.size) return;
     memset(str.c_str, c, str.size);
 }
 
@@ -46,9 +53,10 @@ void String_PrintStats(string_t str)
 
 string_t String_NewL(size_t length)
 {
-    string_t r;
+    string_t r = {};
     r.length = length;
     r.size = String_LowestPowerOfTwo(length);
+    r.temp = false;
     r.c_str = (char*)malloc(r.size * sizeof(char));
     String_Fill(r, 0);
     return r;
@@ -57,17 +65,81 @@ string_t String_NewC(const char* str)
 {
     if (!str) return String_Empty();
 
-    string_t r;
+    string_t r = {};
     r.length = strlen(str);
     r.size = String_LowestPowerOfTwo(r.length);
+    r.temp = false;
     r.c_str = (char*)malloc(r.size * sizeof(char));
     String_Fill(r, 0);
     memcpy_s(r.c_str, r.length, str, r.length);
     return r;
 }
+string_t String_NewS(string_t s)
+{
+    string_t r = {};
+    r.length = s.length;
+    r.size = s.size;
+    r.temp = false;
+    r.c_str = (char*)malloc(r.size * sizeof(char));
+    String_Fill(r, 0);
+    memcpy_s(r.c_str, r.length, s.c_str, s.length);
+    return r;
+}
+string_t String_TempL(size_t length)
+{
+    string_t r = {};
+    r.length = length;
+    r.size = String_LowestPowerOfTwo(length);
+    r.temp = true;
+    r.c_str = (char*)malloc(r.size * sizeof(char));
+    String_Fill(r, 0);
+    return r;
+}
+string_t String_TempC(const char* str)
+{
+    if (!str) return String_Empty();
+
+    string_t r = {};
+    r.length = strlen(str);
+    r.size = String_LowestPowerOfTwo(r.length);
+    r.temp = true;
+    r.c_str = (char*)malloc(r.size * sizeof(char));
+    String_Fill(r, 0);
+    memcpy_s(r.c_str, r.length, str, r.length);
+    return r;
+}
+string_t String_TempS(string_t s)
+{
+    string_t r = {};
+    r.length = s.length;
+    r.size = s.size;
+    r.temp = true;
+    r.c_str = (char*)malloc(r.size * sizeof(char));
+    String_Fill(r, 0);
+    memcpy_s(r.c_str, r.length, s.c_str, s.length);
+    return r;
+}
 string_t String_Empty()
 {
     return (string_t){};
+}
+
+bool String_Compare(string_t a, string_t b)
+{
+    bool retval = false;
+    if (a.c_str == b.c_str) { retval = true; goto ret; }
+    if (!a.c_str || !b.c_str) { retval = false; goto ret; }
+
+    for (size_t i = 0; i <= (a.length > b.length ? b.length : a.length); i++)
+    {
+        if (a.c_str[i] != b.c_str[i]) { retval = false; goto ret; }
+    }
+
+    retval = true;
+    ret:
+        if (a.temp) String_Terminate(a);
+        if (b.temp) String_Terminate(b);
+        return retval;
 }
 
 void String_Resize(string_t* str, size_t size)
@@ -111,19 +183,20 @@ void String_AddS(string_t* dest, string_t a, string_t b)
         if (a.length) memcpy_s(dest->c_str, dest->length, a.c_str, a.length);
         if (b.length) memcpy_s(dest->c_str + a.length, dest->length - a.length, b.c_str,  b.length);
     }
+
+    if (a.temp) String_Terminate(a);
+    if (b.temp) String_Terminate(b);
 }
 void String_AddC(string_t* dest, string_t a, const char* b)
 {
     if(!dest) return;
 
-    string_t B;
+    string_t B = {};
     B.c_str = (char*)b;
     B.length = strlen(b);
     B.size = 0;
+    B.temp = false;
     String_AddS(dest, a, B);
-}
 
-void String_Terminate(string_t str)
-{
-    if(str.c_str) free(str.c_str);
+    if (a.temp) String_Terminate(a);
 }

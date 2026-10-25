@@ -5,11 +5,13 @@
 #include <laiks.h>
 #include <soundtrackhandler.h>
 #include <controls.h>
+//#include <dziivnieki.h>
+#include <dziivnieku_ferma.h>
+#include <soundeffects.h>
 
 int main(void)
 {
     string_t na = String_NewC("Jauns "), me = String_NewC("logs"), name = String_Empty();
-
     String_AddS(&name, na, me);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -20,16 +22,50 @@ int main(void)
     printf("Sveika, pasaule!\n");
 
     printf("\nIzveidots logs %s\n\n", name.c_str);
-
-    Soundtracks_Load("../res/Mutter/");
+    Soundtracks_Load("../res/minecraft/");
     Soundtracks_GenerateRandomQueue();
     Soundtracks_Start(0);
     SetMasterVolume(0.5f);
     //while(1);
 
-    Wave swerr_wave = LoadWave("../res/rebuild error.wav");
-    Sound swerr = LoadSoundFromWave(swerr_wave);
-    UnloadWave(swerr_wave);
+    // if (Dziivnieks_Generate(8, 24) != DZIIVNIEKERR_VISSOK)
+    // {
+    //     printf("Nav ok\n");
+    //     while(1);
+    // }
+
+    Ferma_Generate(8, 50);
+
+
+
+    // Wave swerr_wave = LoadWave("../res/rebuild error.wav");
+    // Sound swerr = LoadSoundFromWave(swerr_wave);
+    // UnloadWave(swerr_wave);
+
+    seff_error_t sefferror = SoundEffect_InitLibrary(8);
+    if (SoundEffect_IsError(sefferror))
+    {
+        printf("\nError: %d\n\n", sefferror);
+        while(1);
+    }
+
+    sefferror = SoundEffect_LoadWave("../res/rebuild error.wav", String_TempC("klhuume"));
+    if (SoundEffect_IsError(sefferror))
+    {
+        printf("\nError: %d\n\n", sefferror);
+        while(1);
+    }
+
+    sefferror = SoundEffect_LoadWave("../res/interference detection complete.wav", String_TempC("interference"));
+    if (SoundEffect_IsError(sefferror))
+    {
+        printf("\nError: %d\n\n", sefferror);
+        while(1);
+    }
+
+    Image ikona = LoadImage("../res/logo_ikona.png");
+    ImageFormat(&ikona, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(ikona);
 
     int windowWidth = GetRenderWidth(), windowHeight = GetRenderHeight();
 
@@ -52,6 +88,8 @@ int main(void)
     string_t liedname = String_Empty();
     string_t liedlange = String_NewL(16);
 
+    Soundtracks_TogglePause();
+
     laiks_t currentTime = (laiks_t){};
     float deltaTime = 0.0f;
     while(!WindowShouldClose())
@@ -69,10 +107,19 @@ int main(void)
 
         if (IsKeyPressed(KEY_ESCAPE) || (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_B)))
         {
-            PlaySound(swerr);
+            sefferror = SoundEffect_PlaySound(String_TempC("klhuume"));
+            if (SoundEffect_IsError(sefferror))
+            {
+                printf("\nError: %d\n\n", sefferror);
+                while(1);
+            }
         }
 
-        if (IsKeyPressed(KEY_P) || (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_SPACE))) Soundtracks_TogglePause();
+        if (IsKeyPressed(KEY_P) || (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_SPACE)))
+        {
+            Soundtracks_TogglePause();
+            SoundEffect_PlaySound(String_TempC("interference"));
+        }
 
         if (Soundtracks_Update(currentTime))
         {
@@ -89,11 +136,13 @@ int main(void)
             ClearBackground(SKYBLUE);
 
             BeginMode3D(*Controls_GetCurrentCamera());
-                DrawRectangle(0, (int)((float)windowHeight * 0.8f), windowWidth, (int)((float)windowHeight * 0.2f), GREEN);
-                DrawCircle((int)playaPos.x, (int)playaPos.y, 20, DARKGREEN);
-                DrawCube((Vector3){}, 1.0f, 1.0f, 1.0f, GREEN);
-                DrawCube((Vector3){0.0f, 0.75f, 0.0f}, 0.5f, 0.5f, 0.5f, RAYWHITE);
-                DrawGrid(10, 1.0f);
+                // DrawRectangle(0, (int)((float)windowHeight * 0.8f), windowWidth, (int)((float)windowHeight * 0.2f), GREEN);
+                // DrawCircle((int)playaPos.x, (int)playaPos.y, 20, DARKGREEN);
+                // DrawCube((Vector3){}, 1.0f, 1.0f, 1.0f, GREEN);
+                // DrawCube((Vector3){0.0f, 0.75f, 0.0f}, 0.5f, 0.5f, 0.5f, RAYWHITE);
+                //DrawGrid(10, 1.0f);
+
+                Ferma_Draw();
             EndMode3D();
 
             // ui
@@ -107,14 +156,13 @@ int main(void)
             DrawText(liedlange.c_str, (windowWidth - MeasureText(liedlange.c_str, 20)) / 2, 30, 20, RAYWHITE);
             
             string_t playaPosText = String_NewL(64);
-            sprintf_s(playaPosText.c_str, playaPosText.length, "Player position:\n x=%f\n y=%f\n z=%f", Controls_GetCurrentCamera()->position.x, Controls_GetCurrentCamera()->position.y, Controls_GetCurrentCamera()->position.z);
+            sprintf_s(playaPosText.c_str, playaPosText.length, "Target position:\n x=%f\n y=%f\n z=%f", Controls_GetCurrentCamera()->target.x, Controls_GetCurrentCamera()->target.y, Controls_GetCurrentCamera()->target.z);
             DrawText(playaPosText.c_str, 10, 70, 20, BLACK);
 
         EndDrawing();
     }
 
 
-    UnloadSound(swerr);
     CloseAudioDevice();
 
 
