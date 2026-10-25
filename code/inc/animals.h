@@ -21,6 +21,8 @@ typedef struct animal_base_t
     void (*deselect)(struct animal_base_t* this);
     bool (*isSelected)(struct animal_base_t* this);
 
+    RayCollision (*checkRay)(struct animal_base_t* this, Ray ray);
+
     void (*draw)(struct animal_base_t* this);
     void (*age)(struct animal_base_t* this, laiks_t currentTime);
 

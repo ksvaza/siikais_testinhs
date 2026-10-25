@@ -131,6 +131,10 @@ int main(void)
 
         Controls_Update(deltaTime);
 
+        Ferma_Update(currentTime);
+        animal_base_t* dz = Ferma_CheckRay(GetScreenToWorldRay(GetMousePosition(), *Controls_GetCurrentCamera()));
+        
+
         BeginDrawing();
 
             ClearBackground(SKYBLUE);

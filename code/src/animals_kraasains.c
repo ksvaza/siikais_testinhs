@@ -72,6 +72,14 @@ bool _Animal_Kraasains_IsSelected(animal_base_t* this)
     return this->private->selected;
 }
 
+RayCollision _Animal_Kraasains_CheckRay(animal_base_t* this, Ray ray)
+{
+    if (!this || !this->private) return (RayCollision){};
+
+    Matrix m = MatrixTranslate(this->private->position.x, this->private->position.y, this->private->position.z);
+    return GetRayCollisionMesh(ray, GenMeshCylinder(0.4f, 1.6f, 8), m);
+}
+
 void _Animal_Kraasains_Draw(animal_base_t* this)
 {
     if (!this || !this->private) return;
@@ -90,7 +98,7 @@ void _Animal_Kraasains_Draw(animal_base_t* this)
         Vector3Add(this->private->position, (Vector3){ 0.0f, 0.4f, 0.0f }),
         Vector3Add(this->private->position, (Vector3){ 0.0f, 1.2f, 0.0f }),
         0.5f,
-        16, 4,
+        8, 4,
         GREEN
     );
 }
@@ -208,6 +216,8 @@ kraasains_dziivnieks_t* Animal_Kraasains_Create(string_t tname, Vector3 startpos
     this->base.select = _Animal_Kraasains_Select;
     this->base.deselect = _Animal_Kraasains_Deselect;
     this->base.isSelected = _Animal_Kraasains_IsSelected;
+
+    this->base.checkRay = _Animal_Kraasains_CheckRay;
 
     this->base.draw = _Animal_Kraasains_Draw;
     this->base.age = _Animal_Kraasains_Age;

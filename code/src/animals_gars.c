@@ -72,6 +72,17 @@ bool _Animal_Gars_IsSelected(animal_base_t* this)
     return this->private->selected;
 }
 
+RayCollision _Animal_Gars_CheckRay(animal_base_t* this, Ray ray)
+{
+    if (!this || !this->private) return (RayCollision){};
+
+    return GetRayCollisionBox(ray, (BoundingBox)
+    {
+        (Vector3){ this->private->position.x - 0.4f, this->private->position.y, this->private->position.z - 0.4f },
+        (Vector3){ this->private->position.x + 0.4f, this->private->position.y + ((gars_dziivnieks_t*)this)->garums, this->private->position.z + 0.4f }
+    });
+}
+
 void _Animal_Gars_Draw(animal_base_t* this)
 {
     if (!this || !this->private) return;
@@ -83,7 +94,7 @@ void _Animal_Gars_Draw(animal_base_t* this)
         ORANGE
     );
 
-    if (_Animal_Gars_IsSelected(this)) DrawCubeV
+    if (_Animal_Gars_IsSelected(this)) DrawCubeWiresV
     (
         Vector3Add(this->private->position, (Vector3){ 0.0f, ((gars_dziivnieks_t*)this)->garums / 2.0f, 0.0f }),
         (Vector3){ 1.0f, ((gars_dziivnieks_t*)this)->garums + 0.2f, 1.0f },
@@ -206,6 +217,8 @@ gars_dziivnieks_t* Animal_Gars_Create(string_t tname, Vector3 startpos, float ga
     this->base.select = _Animal_Gars_Select;
     this->base.deselect = _Animal_Gars_Deselect;
     this->base.isSelected = _Animal_Gars_IsSelected;
+
+    this->base.checkRay = _Animal_Gars_CheckRay;
 
     this->base.draw = _Animal_Gars_Draw;
     this->base.age = _Animal_Gars_Age;

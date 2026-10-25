@@ -205,7 +205,47 @@ void Ferma_Draw()
     }
 }
 
-animal_base_t* Ferma_CheckRay()
+
+animal_base_t* DZIIVNIEKU_FERMA_CURRENT_HIT = nullptr;
+animal_base_t* Ferma_CheckRay(Ray ray)
 {
-    return nullptr;
+    animal_base_t** dfp = DZIIVNIEKU_FERMA;
+    if (!dfp) return nullptr;
+
+    RayCollision c = {}; bool f = false; int ci = 0;
+    for (int i = 0; i < DZIIVNIEKU_FERMAS_DZIIVNIEKU_SKAITS; i++)
+    {
+        if (!dfp[i] || !dfp[i]->checkRay) continue;
+
+        RayCollision t = dfp[i]->checkRay(dfp[i], ray);
+        if (t.hit)
+        {
+            if (!f)
+            {
+                c = t;
+                ci = i;
+                f = true;
+            }
+            else if (t.distance < c.distance)
+            {
+                c = t;
+                ci = i;
+            }
+        }
+    }
+    if (!f || !dfp[ci]) // return nullptr;
+    {
+        if (DZIIVNIEKU_FERMA_CURRENT_HIT) DZIIVNIEKU_FERMA_CURRENT_HIT->deselect(DZIIVNIEKU_FERMA_CURRENT_HIT);
+        DZIIVNIEKU_FERMA_CURRENT_HIT = nullptr;
+        return nullptr;
+    }
+
+    if (DZIIVNIEKU_FERMA_CURRENT_HIT != dfp[ci]) 
+    {
+        if (DZIIVNIEKU_FERMA_CURRENT_HIT) DZIIVNIEKU_FERMA_CURRENT_HIT->deselect(DZIIVNIEKU_FERMA_CURRENT_HIT);
+        dfp[ci]->select(dfp[ci]);
+        DZIIVNIEKU_FERMA_CURRENT_HIT = dfp[ci];
+    }
+
+    return dfp[ci];
 }
