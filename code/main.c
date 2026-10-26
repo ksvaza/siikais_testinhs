@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <raylib.h>
+#include <raymath.h>
 
 #include <stringutils.h>
 #include <laiks.h>
@@ -131,6 +132,29 @@ int main(void)
 
         Controls_Update(deltaTime);
 
+        static bool cammoving = false;
+        static bool camfresh = false;
+        static laiks_t camtime = {};
+        if (cammoving && Ferma_GetFocus())
+        {
+            static Vector3 dir = {};
+            if (camfresh)
+            {
+                // te nav
+                animal_base_t* d = Ferma_GetFocus();
+                dir = Vector3Add(d->getPos(d), Vector3Invert(Controls_GetTarget()));
+                camfresh = false;
+            }
+            Controls_Move(Vector3Scale(dir, deltaTime), true);
+
+            if (Laiks_InSeconds(Laiks_Subtract(currentTime, camtime)) >= 1.0f)
+            {
+                animal_base_t* d = Ferma_GetFocus();
+                cammoving = false;
+                //Controls_MoveTo(dz->getPos(dz), true);
+            }
+        }
+
         Ferma_Update(currentTime);
         animal_base_t* dz = Ferma_CheckRay(GetScreenToWorldRay(GetMousePosition(), *Controls_GetCurrentCamera()));
         
@@ -159,9 +183,41 @@ int main(void)
             DrawText(liedname.c_str, 10, 30, 20, RAYWHITE);
             DrawText(liedlange.c_str, (windowWidth - MeasureText(liedlange.c_str, 20)) / 2, 30, 20, RAYWHITE);
             
-            string_t playaPosText = String_NewL(64);
-            sprintf_s(playaPosText.c_str, playaPosText.length, "Target position:\n x=%f\n y=%f\n z=%f", Controls_GetCurrentCamera()->target.x, Controls_GetCurrentCamera()->target.y, Controls_GetCurrentCamera()->target.z);
+            string_t playaPosText = String_NewL(256);
+            animal_base_t* d = Ferma_GetFocus();
+            if (d) sprintf_s(playaPosText.c_str, playaPosText.length, "Target position:\n x=%f\n y=%f\n z=%f\n targetdist=%f\n\nDzpos:\n x=%f\n y=%f\nz=%f", Controls_GetCurrentCamera()->target.x, Controls_GetCurrentCamera()->target.y, Controls_GetCurrentCamera()->target.z, Controls_GetCurrentTargetDistance(), d->getPos(d).x, d->getPos(d).y, d->getPos(d).z);
+            else sprintf_s(playaPosText.c_str, playaPosText.length, "Target position:\n x=%f\n y=%f\n z=%f\n targetdist=%f", Controls_GetCurrentCamera()->target.x, Controls_GetCurrentCamera()->target.y, Controls_GetCurrentCamera()->target.z, Controls_GetCurrentTargetDistance());
             DrawText(playaPosText.c_str, 10, 70, 20, BLACK);
+
+            if (dz)
+            {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                {
+                    Ferma_SetFocus(dz);
+                    cammoving = true;
+                    camfresh = true;
+                    camtime = currentTime;
+                } 
+                Vector3 dzpos = dz->getPos(dz);
+                Vector2 texpos = {};
+                string_t dname = dz->getName(dz);
+                string_t dtype = dz->getTypeName(dz);
+                Colour col = ORANGE;
+                if (dtype.c_str)
+                {
+                    if (String_Compare(dtype, String_TempC("garais")))
+                    {
+                        texpos = GetWorldToScreen(Vector3Add(dzpos, (Vector3){ 0.0f, ((gars_dziivnieks_t*)dz)->garums, 0.0f }), *Controls_GetCurrentCamera());
+                    }
+                    else if (String_Compare(dtype, String_TempC("kraasainais")))
+                    {
+                        col = ((kraasains_dziivnieks_t*)dz)->kraasa;
+                        texpos = GetWorldToScreen(Vector3Add(dzpos, (Vector3){ 0.0f, 1.6f, 0.0f }), *Controls_GetCurrentCamera());
+                    }
+                }
+                if (dname.c_str) DrawText(dname.c_str, (int)(texpos.x - (float)MeasureText(dname.c_str, 20) / 2.0f), texpos.y - 22, 20, BLACK);
+                if (dtype.c_str) DrawText(dtype.c_str, (int)(texpos.x - (float)MeasureText(dtype.c_str, 20) / 2.0f), texpos.y - 44, 20, BLACK);
+            }
 
         EndDrawing();
     }

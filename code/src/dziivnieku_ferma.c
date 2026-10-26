@@ -207,6 +207,15 @@ void Ferma_Draw()
 
 
 animal_base_t* DZIIVNIEKU_FERMA_CURRENT_HIT = nullptr;
+animal_base_t* DZIIVNIEKU_FERMA_CURRENT_FOCUS = nullptr;
+void Ferma_SetFocus(animal_base_t* dz)
+{
+    DZIIVNIEKU_FERMA_CURRENT_FOCUS = dz;
+}
+animal_base_t* Ferma_GetFocus()
+{
+    return DZIIVNIEKU_FERMA_CURRENT_FOCUS;
+}
 animal_base_t* Ferma_CheckRay(Ray ray)
 {
     animal_base_t** dfp = DZIIVNIEKU_FERMA;

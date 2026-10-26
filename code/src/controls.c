@@ -5,6 +5,7 @@
 Camera3D controlsCamera = {};
 
 bool controlsFlippedArrowMovement = false;
+bool controlsUpdated = false;
 
 float controlsMouseTranslationSpeed = 0.0008f;
 float controlsMouseRotationSpeed = 0.01f;
@@ -22,6 +23,7 @@ void Controls_Update(float dt) // cietdarbi
     if (wheel.y != 0.0f)
     {
         CameraMoveToTarget(&controlsCamera, zoom * controlsMouseScrollSpeed * wheel.y);
+        controlsUpdated = true;
     }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_MIDDLE))
@@ -39,23 +41,28 @@ void Controls_Update(float dt) // cietdarbi
         {
             CameraMoveRight(&controlsCamera, -controlsMouseTranslationSpeed * zoom * mouse.x, false);
             CameraMoveUp(&controlsCamera, controlsMouseTranslationSpeed * zoom * mouse.y);
+            controlsUpdated = true;
         }
 
         if (IsKeyPressed(KEY_LEFT))
         {
             CameraMoveRight(&controlsCamera, -0.1 * zoom * (controlsFlippedArrowMovement ? -1.0f : 1.0f), false);
+            controlsUpdated = true;
         }
         if (IsKeyPressed(KEY_RIGHT))
         {
             CameraMoveRight(&controlsCamera, 0.1 * zoom * (controlsFlippedArrowMovement ? -1.0f : 1.0f), false);
+            controlsUpdated = true;
         }
         if (IsKeyPressed(KEY_UP))
         {
             CameraMoveUp(&controlsCamera, 0.1 * zoom * (controlsFlippedArrowMovement ? -1.0f : 1.0f));
+            controlsUpdated = true;
         }
         if (IsKeyPressed(KEY_DOWN))
         {
             CameraMoveUp(&controlsCamera, -0.1 * zoom * (controlsFlippedArrowMovement ? -1.0f : 1.0f));
+            controlsUpdated = true;
         }
     }
     else
@@ -99,4 +106,31 @@ void Controls_Init()
 Camera3D* Controls_GetCurrentCamera()
 {
     return &controlsCamera;
+}
+
+float Controls_GetCurrentTargetDistance()
+{
+    return Vector3Distance(controlsCamera.position, controlsCamera.target);
+}
+
+Vector3 Controls_GetTarget()
+{
+    return controlsCamera.target;
+}
+void Controls_Move(Vector3 direction, bool sync)
+{
+    controlsCamera.target = Vector3Add(controlsCamera.target, direction);
+    if (sync) controlsCamera.position = Vector3Add(controlsCamera.position, direction);
+}
+void Controls_MoveTo(Vector3 position, bool sync)
+{
+    Vector3 d = Vector3Add(position, Vector3Invert(controlsCamera.target));
+    controlsCamera.target = Vector3Add(controlsCamera.target, d);
+    if (sync) controlsCamera.position = Vector3Add(controlsCamera.position, d);
+}
+
+
+bool Controls_Updated()
+{
+    return controlsUpdated;
 }

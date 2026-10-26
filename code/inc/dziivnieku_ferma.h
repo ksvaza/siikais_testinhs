@@ -10,6 +10,9 @@
 void Ferma_Generate(int fermas_izmeers, int dziivnieku_skaits);
 void Ferma_Update(laiks_t currentTime);
 void Ferma_Draw();
+
+void Ferma_SetFocus(animal_base_t* dz);
+animal_base_t* Ferma_GetFocus();
 animal_base_t* Ferma_CheckRay(Ray ray);
 
 
